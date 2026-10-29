@@ -1,0 +1,76 @@
+{
+  "cases": [
+    {
+      "id": "bad_rate_by_segment-top",
+      "question": "Which PAY 0 has the highest average default.payment.next.month?",
+      "tool": "bad_rate_by_segment",
+      "args": {
+        "metric": "default.payment.next.month",
+        "agg": "mean"
+      },
+      "expect": {
+        "kind": "top_group",
+        "value": 7
+      }
+    },
+    {
+      "id": "woe_iv_table-monotonic",
+      "question": "How does the default rate change across bins of LIMIT BAL?",
+      "tool": "woe_iv_table",
+      "args": {
+        "feature": "LIMIT_BAL"
+      },
+      "expect": {
+        "kind": "monotonic_bad_rate"
+      }
+    },
+    {
+      "id": "scorecard_performance-bad-rate",
+      "question": "What is the overall default rate (default.payment.next.month)?",
+      "tool": "scorecard_performance",
+      "args": {},
+      "expect": {
+        "kind": "overall_bad_rate",
+        "value": 0.2212
+      }
+    },
+    {
+      "id": "scorecard_performance-gini-floor",
+      "question": "How well does the scorecard separate defaulters on the test set?",
+      "tool": "scorecard_performance",
+      "args": {},
+      "expect": {
+        "kind": "test_gini_at_least",
+        "value": 0.2
+      }
+    },
+    {
+      "id": "score_breakdown-points",
+      "question": "Which characteristics cost a typical applicant the most points?",
+      "tool": "score_breakdown",
+      "args": {},
+      "expect": {
+        "kind": "points_sum_to_score"
+      }
+    },
+    {
+      "id": "filter_accounts-count",
+      "question": "How many records are there?",
+      "tool": "filter_accounts",
+      "args": {},
+      "expect": {
+        "kind": "matched_count",
+        "value": 30000
+      }
+    }
+  ],
+  "pinned": {
+    "at": "2026-10-29T11:16:33.965120+00:00",
+    "by": "scripts/pin_expectations.py (pyarrow + plain Python, independent of the tools)",
+    "source_sha256": {
+      "zenodo-12524822": [
+        "a0f0ab49d6326671d6cd83be5c88dcf18007025fe9a53ecd699119c871176ca1"
+      ]
+    }
+  }
+}

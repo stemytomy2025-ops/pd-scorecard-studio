@@ -1,0 +1,7 @@
+anthropic>=1.0
+streamlit>=1.40
+pandas>=2.2
+pyarrow>=16
+scikit-learn>=1.5
+pydantic>=2.7
+.

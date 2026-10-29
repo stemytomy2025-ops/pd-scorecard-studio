@@ -1,0 +1,21 @@
+# Secrets
+.env
+.streamlit/secrets.toml
+
+# Downloaded data (re-create with scripts/fetch_data.py)
+data/raw/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Eval run outputs
+evals/last_run.json
+
+# Local documentation and build metadata, kept out of the public repository
+docs/
+GENERATED_FROM.json

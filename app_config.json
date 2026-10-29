@@ -1,0 +1,151 @@
+{
+  "title": "PD Scorecard Studio",
+  "tagline": "Build a classic PD scorecard on 30,000 public credit-card accounts: monotonic binning, WoE/IV feature selection, logistic regression, points scaling, calibration and Gini/KS validation. A Claude agent answers risk questions by calling validated scorecard tools (bad rates, IV tables, performance, score breakdowns) and explains results in validator-friendly language.",
+  "model": "claude-opus-5-5",
+  "effort": "medium",
+  "max_turns": 6,
+  "max_tool_calls": 8,
+  "use_refusal_fallback": true,
+  "is_test_fixture": false,
+  "datasets": [
+    {
+      "id": "zenodo-12524822",
+      "name": "UCI_Credit_Card",
+      "landing_page": "https://zenodo.org/records/12524822",
+      "license": "cc-by-4.0",
+      "attribution": "UCI_Credit_Card, https://zenodo.org/records/12524822 (licence: cc-by-4.0)",
+      "source": {
+        "kind": "http_csv",
+        "url": "https://zenodo.org/api/records/12524822/files/UCI_Credit_Card.csv/content",
+        "max_mb": 300
+      },
+      "expected_schema": {
+        "ID": "integer",
+        "LIMIT_BAL": "float",
+        "EDUCATION": "integer",
+        "MARRIAGE": "integer",
+        "AGE": "integer",
+        "PAY_0": "integer",
+        "PAY_2": "integer",
+        "PAY_3": "integer",
+        "PAY_4": "integer",
+        "PAY_5": "integer",
+        "PAY_6": "integer",
+        "BILL_AMT1": "float",
+        "BILL_AMT6": "float",
+        "PAY_AMT1": "float",
+        "PAY_AMT6": "float",
+        "default.payment.next.month": "integer"
+      },
+      "expected_min_rows": 30000,
+      "limitations": [
+        "Automated inspection: Snapshot inspected 2026-10-28; the source may change after this date.",
+        "Taiwan 2005 card portfolio, not Nordic; one observation window so no vintages or time-based PSI.",
+        "Zenodo record does not cite Yeh & Lien (2009) explicitly; matches the UCI 'Default of Credit Card Clients' description (30,000 rows, Apr-Sep 2005).",
+        "PAY_* codes include -2/-1/0 whose meaning is debated in the literature; treat as categorical bins.",
+        "SEX, MARRIAGE and AGE are protected or sensitive attributes; exclude SEX/MARRIAGE from the scorecard and only report them for fairness checks."
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "bad_rate_by_segment",
+      "description": "Default rate and account count of default.payment.next.month grouped by a categorical driver (e.g. most recent repayment status PAY_0, EDUCATION).",
+      "operation": "aggregate",
+      "dataset_id": "zenodo-12524822",
+      "params": {
+        "group": "PAY_0",
+        "metrics": [
+          "default.payment.next.month",
+          "LIMIT_BAL"
+        ],
+        "filterable": [
+          "EDUCATION",
+          "PAY_0",
+          "default.payment.next.month"
+        ]
+      }
+    },
+    {
+      "name": "woe_iv_table",
+      "description": "Monotonic/quantile binning of one driver with per-bin counts, bad rate, WoE and total Information Value.",
+      "operation": "woe_iv",
+      "dataset_id": "zenodo-12524822",
+      "params": {
+        "target": "default.payment.next.month",
+        "features": [
+          "LIMIT_BAL",
+          "PAY_0",
+          "PAY_2",
+          "PAY_3",
+          "BILL_AMT1",
+          "PAY_AMT1",
+          "PAY_AMT6"
+        ]
+      }
+    },
+    {
+      "name": "scorecard_performance",
+      "description": "Fit (cached) WoE logistic scorecard on a seeded train split; return Gini, KS, AUC on train/test and a calibration table by score decile (predicted vs observed PD).",
+      "operation": "scorecard_performance",
+      "dataset_id": "zenodo-12524822",
+      "params": {
+        "target": "default.payment.next.month",
+        "features": [
+          "LIMIT_BAL",
+          "PAY_0",
+          "PAY_2",
+          "PAY_3",
+          "BILL_AMT1",
+          "PAY_AMT1",
+          "PAY_AMT6"
+        ]
+      }
+    },
+    {
+      "name": "score_breakdown",
+      "description": "Points contribution per characteristic for one account ID or a what-if input, with the resulting score and PD.",
+      "operation": "score_breakdown",
+      "dataset_id": "zenodo-12524822",
+      "params": {
+        "target": "default.payment.next.month",
+        "features": [
+          "LIMIT_BAL",
+          "PAY_0",
+          "PAY_2",
+          "PAY_3",
+          "BILL_AMT1",
+          "PAY_AMT1",
+          "PAY_AMT6"
+        ],
+        "id": "ID"
+      }
+    },
+    {
+      "name": "filter_accounts",
+      "description": "Return accounts matching filters on repayment status and education, for drill-down.",
+      "operation": "filter_rows",
+      "dataset_id": "zenodo-12524822",
+      "params": {
+        "columns": [
+          "ID",
+          "PAY_0",
+          "EDUCATION",
+          "LIMIT_BAL",
+          "default.payment.next.month"
+        ],
+        "filterable": [
+          "EDUCATION",
+          "PAY_0",
+          "default.payment.next.month"
+        ]
+      }
+    }
+  ],
+  "example_questions": [
+    "Which characteristics have the highest Information Value, and which would you drop?",
+    "What is the scorecard's Gini on the test set, and is it well calibrated by decile?",
+    "How does default rate change with the most recent repayment status PAY_0?",
+    "Why did account 1234 get its score? Which characteristics cost it the most points?"
+  ]
+}
