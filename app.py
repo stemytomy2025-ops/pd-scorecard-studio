@@ -162,7 +162,30 @@ def ask(question: str, frames: dict[str, pd.DataFrame], registry: ToolRegistry) 
 
 
 # ---------------------------------------------------------------- sidebar
-
+with st.sidebar:
+    if CONFIG.is_test_fixture:
+        st.info("TEST FIXTURE: built for a fictional company to exercise the factory.")
+    st.header("Data")
+    for ds in CONFIG.datasets:
+        manifest = load_manifest(ds)
+        st.markdown(f"**{ds.name}**  \n{ds.license} · [source]({ds.landing_page})")
+        if manifest:
+            st.success(f"{manifest['rows']:,} rows · schema validated")
+            st.caption(f"Fetched {manifest['fetched_at'][:19]} UTC")
+        else:
+            st.warning("Not downloaded yet")
+    if st.button("Download / refresh data", use_container_width=True):
+        with st.status("Downloading real data", expanded=True) as status:
+            try:
+                for ds in CONFIG.datasets:
+                    fetch_dataset(ds, progress=status.write)
+            except DataError as exc:
+                status.update(label="Download failed", state="error")
+                st.error(str(exc))
+            else:
+                status.update(label="Data ready", state="complete")
+                st.cache_resource.clear()
+                st.rerun()
 # ---------------------------------------------------------------- main
 st.title(CONFIG.title)
 st.caption(CONFIG.tagline)
