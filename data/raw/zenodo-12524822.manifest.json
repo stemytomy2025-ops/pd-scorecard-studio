@@ -1,0 +1,41 @@
+{
+  "dataset_id": "zenodo-12524822",
+  "fetched_at": "2026-10-29T11:16:28.140040+00:00",
+  "rows": 30000,
+  "columns": [
+    "ID",
+    "LIMIT_BAL",
+    "SEX",
+    "EDUCATION",
+    "MARRIAGE",
+    "AGE",
+    "PAY_0",
+    "PAY_2",
+    "PAY_3",
+    "PAY_4",
+    "PAY_5",
+    "PAY_6",
+    "BILL_AMT1",
+    "BILL_AMT2",
+    "BILL_AMT3",
+    "BILL_AMT4",
+    "BILL_AMT5",
+    "BILL_AMT6",
+    "PAY_AMT1",
+    "PAY_AMT2",
+    "PAY_AMT3",
+    "PAY_AMT4",
+    "PAY_AMT5",
+    "PAY_AMT6",
+    "default.payment.next.month"
+  ],
+  "sources": [
+    {
+      "url": "https://zenodo.org/api/records/12524822/files/UCI_Credit_Card.csv/content",
+      "bytes": 2862995,
+      "sha256": "a0f0ab49d6326671d6cd83be5c88dcf18007025fe9a53ecd699119c871176ca1"
+    }
+  ],
+  "license": "cc-by-4.0",
+  "attribution": "UCI_Credit_Card, https://zenodo.org/records/12524822 (licence: cc-by-4.0)"
+}
